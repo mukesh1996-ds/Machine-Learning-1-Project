@@ -1,4 +1,6 @@
-# Machine-Learning-1-Project
+# Project Description
+
+## Installation and setup.py 
 
 1. Create New Environment 
 
