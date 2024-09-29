@@ -15,3 +15,6 @@ conda activate venv/
 pip install -r requirements.txt
 ```
 
+4. Let's setup the setup.py file 
+
+In Python, setup.py is a module used to build and distribute Python packages. It typically contains information about the package, such as its name, version, and dependencies, as well as instructions for building and installing the package
