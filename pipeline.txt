@@ -13,3 +13,10 @@ constant file
          --> Data Transformation
             --> Utils File (if required)
                  --> Data Transformation
+
+## --> STAGE 3 <--
+
+constant --
+    Configuration
+    Model Training
+    Utils file (helper function)
