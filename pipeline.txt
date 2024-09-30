@@ -1,1 +1,6 @@
-Constant File --> Configuration File --> Data Ingestion 
+
+## --> STAGE 1 <--
+
+Constant File (update all the directories)
+    --> Configuration File (Merge the directories for path)
+             --> Data Ingestion (Created a script to load,split and save the data in artifacts folder) 
