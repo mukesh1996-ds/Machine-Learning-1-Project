@@ -29,181 +29,162 @@ This project implements an end-to-end automated pipeline that orchestrates the e
 
 The Automated Machine Learning Pipeline is an orchestrated experiment designed to streamline the entire ML workflow from data collection to model deployment. It ensures reproducibility, consistency, and validation of ML models. The pipeline has been designed with six stages that can be executed sequentially.
 
-## Pipeline Stages
+# Online Delivery Predictions - README
 
-### Stage 1: Data Extraction
+Welcome to the **Online Delivery Predictions** project! This project aims to predict the time taken for food deliveries based on a variety of factors, including geographic information, traffic conditions, weather, and more. Below, you'll find a detailed explanation of the project structure, steps involved, and the overall pipeline used to achieve accurate delivery time predictions.
 
-- **Objective**: Fetch data from any server to a local system.
-- **Input**: Data is extracted from an S3 bucket or any other remote data storage location.
-- **Output**: Data is saved locally, for example, `data.csv`.
-- **Tools**: AWS SDK (e.g., Boto3), Python `pandas`.
+---
 
-```python
-# Example code for data extraction from S3
-import boto3
+## Project Overview
 
-s3 = boto3.client('s3')
-s3.download_file('my_bucket', 'data.csv', 'local_data.csv')
-```
+In this project, we predict the **Time_taken (min)** for food deliveries using the following features:
 
-### Stage 2: Data Analysis
+- Delivery personnel information (age, ratings, multiple deliveries)
+- Geographic data (restaurant and delivery location coordinates)
+- Weather and road conditions
+- Type of vehicle and type of order
+- City and festival indicators
 
-- **Objective**: Perform Exploratory Data Analysis (EDA), handle missing values, and impute or remove null values.
-- **Tasks**: 
-  - Visualize data distributions.
-  - Handle missing values, outliers, and skewed data.
-  - Generate summary statistics.
-- **Output**: Cleaned dataset.
-- **Tools**: Jupyter Notebook, `pandas`, `matplotlib`, `seaborn`.
+### Key Features
+- **Restaurant and Delivery Coordinates**: Using latitude and longitude values to calculate the distance between the restaurant and the delivery location.
+- **Weather and Traffic**: These real-time conditions directly influence the delivery time.
+- **Vehicle Condition**: The condition of the delivery vehicle also impacts the delivery speed.
+  
+### Target Variable
+- **Time_taken (min)**: The total time taken for each delivery, which serves as the target variable for our prediction model.
 
-```python
-# Example code for handling missing values
-import pandas as pd
+---
 
-df = pd.read_csv('local_data.csv')
-df.fillna(df.mean(), inplace=True)  # Imputing missing values
-```
+## Project Pipeline
 
-### Stage 3: Data Validation
+The project is structured into three stages, each stage focusing on a different part of the machine learning pipeline. Below is a summary of each stage:
 
-- **Objective**: Verify if the dataset meets the expectations for modeling.
-- **Tasks**:
-  - Ensure the dataset contains 12 features (5 categorical, 5 numerical, and 2 float).
-  - Check column names, data types, and other structural requirements.
-- **Output**: Validation report.
-- **Tools**: Python `pandas`.
+---
 
-```python
-# Example code for validating features
-expected_features = {'Category1': 'object', 'Category2': 'object', 
-                     'Num1': 'int64', 'Num2': 'int64', 'Float1': 'float64'}
+### --> STAGE 1 <--
 
-for column, dtype in expected_features.items():
-    assert df[column].dtype == dtype, f"Feature {column} has incorrect type!"
-```
+**Goal**: Data Ingestion and Preprocessing
 
-### Stage 4: Data Preparation
+1. **Constant File**: This file contains all necessary directories and paths for the project.
+   
+2. **Configuration File**: The configuration file merges all the necessary directories and path settings required for ingestion and storage.
 
-- **Objective**: Perform feature engineering and data transformation.
-- **Tasks**: 
-  - Transform categorical variables using one-hot encoding or label encoding.
-  - Scale numerical features.
-  - Generate new features based on domain knowledge.
-- **Output**: Transformed dataset ready for modeling.
-- **Tools**: `sklearn`, `pandas`.
+3. **Data Ingestion**: This script handles loading, splitting, and saving the data in the artifacts folder. It ensures that the data is correctly partitioned into training, validation, and test sets.
 
-```python
-# Example code for feature engineering
-from sklearn.preprocessing import StandardScaler, LabelEncoder
+---
 
-# Example: Scaling numeric features
-scaler = StandardScaler()
-df[['Num1', 'Num2']] = scaler.fit_transform(df[['Num1', 'Num2']])
+### --> STAGE 2 <--
 
-# Example: Encoding categorical features
-encoder = LabelEncoder()
-df['Category1'] = encoder.fit_transform(df['Category1'])
-```
+**Goal**: Data Transformation and Preparation
 
-### Stage 5: Model Training, Evaluation & Validation
+1. **Constant File**: Directory and constant settings required for transformation.
+   
+2. **Configuration File**: Handles the configuration for the data transformation steps.
+   
+3. **Data Transformation**: The script applies all necessary transformations such as:
+   - Handling missing values
+   - Normalization and scaling of numerical features
+   - Encoding of categorical features (e.g., weather, traffic conditions)
 
-- **Objective**: Train the model, evaluate its performance, and store the validation results in a model registry.
-- **Tasks**: 
-  - Split the data into training and testing sets.
-  - Train the model using appropriate algorithms.
-  - Evaluate the model using metrics such as accuracy, precision, recall, etc.
-  - Store the trained model in a model registry for future validation.
-- **Output**: Trained and validated model.
-- **Tools**: `sklearn`, `mlflow`, `pandas`.
+4. **Utils File**: Contains helper functions to streamline the data transformation process, used if needed during transformation.
 
-```python
-# Example code for model training and validation
-from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score
+---
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
-model = RandomForestClassifier()
-model.fit(X_train, y_train)
+### --> STAGE 3 <--
 
-# Model evaluation
-y_pred = model.predict(X_test)
-print(f"Accuracy: {accuracy_score(y_test, y_pred)}")
-```
+**Goal**: Model Training and Evaluation
 
-### Stage 6: Deployment
+1. **Constant File**: Contains model-related directories and constants.
+   
+2. **Configuration File**: Specifies model hyperparameters, paths for saving models, and evaluation metrics.
 
-- **Objective**: Deploy the model into a production environment.
-- **Tasks**: 
-  - Deploy the model to a web service or cloud platform.
-  - Expose the model through an API for real-time predictions.
-- **Output**: Live model serving predictions.
-- **Tools**: AWS Lambda, Flask, FastAPI.
+3. **Model Training**: The script handles the training of different models (e.g., Linear Regression, Decision Trees, Random Forests, etc.) to predict the delivery time. It also includes cross-validation steps to ensure model generalizability.
 
-```python
-# Example code for deploying a model with Flask
-from flask import Flask, request, jsonify
-app = Flask(__name__)
+4. **Utils File**: Contains helper functions related to model evaluation and saving results, such as metrics calculation (RMSE, MAE, etc.) and model persistence.
 
-@app.route('/predict', methods=['POST'])
-def predict():
-    data = request.get_json()
-    prediction = model.predict([data['features']])
-    return jsonify({'prediction': prediction.tolist()})
-```
+---
 
-## Environments
+### Key Files and Directories
 
-### Beta Testing
-This environment is used for experimentation and development, and includes the following stages:
-- **Experimentation**: Early-stage data experimentation and model prototyping.
-- **Development**: Refining the pipeline and preparing the model for testing.
-- **Test**: Running the pipeline in a controlled test environment.
+1. **artifacts/**: Stores all generated artifacts, such as trained models, processed data, and predictions.
+2. **constants/**: Holds files related to constants such as directory paths.
+3. **configs/**: Contains configuration files for each stage (data ingestion, transformation, and model training).
+4. **utils/**: Utility functions that assist in data handling, model evaluation, and more.
+5. **data/**: Contains raw and split datasets.
+6. **models/**: Stores trained models and results.
 
-### Final Launch
-This environment is for the final stages before and after the model is put into production:
-- **Staging**: Preproduction testing with production-like data.
-- **Preproduction**: Verifying model performance in real-world conditions.
-- **Production**: Final deployment of the model into a live environment.
+---
 
-## Model Registry
+### Technologies Used
 
-The **Model Registry** is a centralized storage system where validated models are stored after training. It helps keep track of model versions, validation metrics, and deployment readiness.
+- **Programming Language**: Python
+- **Libraries**:
+  - **pandas** for data manipulation
+  - **scikit-learn** for model training and evaluation
+  - **folium** for map visualizations
+  - **NumPy** for numerical operations
+  - **Matplotlib** for plotting data insights
+  - **joblib** for saving and loading trained models
 
-Tools like **MLflow** can be used to manage model registration, track experiments, and automate versioning.
+---
 
-```python
-import mlflow
-mlflow.log_param("model_type", "RandomForest")
-mlflow.log_metric("accuracy", accuracy_score(y_test, y_pred))
-mlflow.sklearn.log_model(model, "model")
-```
+## Pipeline Image
 
-## Installation
+Ensure to include the pipeline image from the `images/` folder that illustrates the stages mentioned above. The image provides a visual representation of the pipeline, detailing how data flows from ingestion to model training.
 
-1. Clone the repository:
+---
+
+## Installation and Usage
+
+To run this project, you'll need to install the necessary Python libraries.
+
+1. **Clone the repository**:
+
    ```bash
-   git clone https://github.com/your-username/automated-ml-pipeline.git
+   git clone https://github.com/your-username/online-delivery-predictions.git
+   cd online-delivery-predictions
    ```
-2. Install the necessary dependencies:
+
+2. **Install dependencies**:
+
    ```bash
    pip install -r requirements.txt
    ```
 
-## Usage
+3. **Run the pipeline**:
 
-1. **Run the pipeline**: 
-   You can trigger the entire pipeline by executing the main script.
+   Each stage can be run independently by executing the respective scripts located in the `src/` folder. For example:
+
    ```bash
-   python run_pipeline.py
+   python src/data_ingestion.py
+   python src/data_transformation.py
+   python src/model_training.py
    ```
-2. **View experiment results**: 
-   Results are logged and stored in `mlflow` or any logging tool you configure.
 
-## License
+4. **Check artifacts**:
 
-This project is licensed under the MIT License. See the `LICENSE` file for details.
+   After execution, the outputs (processed data, models) will be available in the `artifacts/` folder.
 
 ---
 
-This `README.md` outlines the key stages of the automated pipeline, including data handling, model training, evaluation, and deployment.
+## Future Improvements
+
+- **Model Optimization**: Fine-tuning the model with more advanced techniques like hyperparameter tuning using GridSearchCV or RandomSearchCV.
+- **Feature Engineering**: Adding more sophisticated features such as traffic prediction models or real-time weather data could improve the delivery time prediction accuracy.
+- **Deployment**: The model can be deployed using tools like **Flask** or **FastAPI** for real-time predictions in a production environment.
+
+---
+
+## Contributing
+
+We welcome contributions! Please feel free to submit a pull request or raise issues for any bugs or feature requests.
+
+---
+
+## License
+
+This project is licensed under the MIT License – see the `LICENSE` file for details.
+
+---
+
+This README covers the basic structure and workflow of the **Online Delivery Predictions** project. Let me know if you'd like to further customize or modify the content.
