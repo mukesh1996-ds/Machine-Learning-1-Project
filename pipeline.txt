@@ -4,3 +4,12 @@
 Constant File (update all the directories)
     --> Configuration File (Merge the directories for path)
              --> Data Ingestion (Created a script to load,split and save the data in artifacts folder) 
+
+
+## --> STAGE 2 <--
+
+constant file
+    --> Configuration File
+         --> Data Transformation
+            --> Utils File (if required)
+                 --> Data Transformation
